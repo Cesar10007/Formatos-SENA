@@ -19,18 +19,36 @@ public class Login extends javax.swing.JFrame {
     private JPanel correccionContainer;
     private ArrayList<JPanel> correccionPanels;
     private int numeroFilasTabla;
+    private int alturaTotal;
+    
 
 public Login() {
     initDialog();
     initComponents();
     
-    // Agregar estas líneas
+    CONTROL = createControlPanel();
+    
+    // Cambiar el layout del Main a AbsoluteLayout
+    Main.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+    
+    // Crear los paneles de corrección
+    createCorreccionPanels();
+    
+    // Agregar un JScrollPane para permitir scroll cuando sea necesario
     JScrollPane scrollPane = new JScrollPane(Main);
     scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
     scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+    
+    // Mantener el borde y el fondo del panel principal
+    scrollPane.setBorder(BorderFactory.createEmptyBorder());
     setContentPane(scrollPane);
     
-    createCorreccionPanels();
+    // Establecer un tamaño inicial para la ventana
+    setSize(1100, 800);
+    
+    // Revalidar y repintar el frame
+    revalidate();
+    repaint();
 }
     private void initDialog() {
     // Diálogo para número de repeticiones
@@ -126,26 +144,93 @@ private JPanel createDynamicTable(int rows) {
     return tablePanel;
 }
 private void createCorreccionPanels() {
-    // Eliminar el panel de Corrección original
-    Main.remove(Correccion);
+    // Eliminar los paneles existentes primero
+    Main.removeAll();
+    
+    // Volver a agregar el header ya que removeAll() lo eliminó
+    Main.add(header, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 20, 770, 60));
 
-    // Crear un nuevo contenedor para los paneles de corrección
-    correccionContainer = new JPanel();
+    // Crear un nuevo contenedor para los paneles de corrección con layout vertical
+    JPanel correccionContainer = new JPanel();
     correccionContainer.setLayout(new BoxLayout(correccionContainer, BoxLayout.Y_AXIS));
     correccionContainer.setBackground(Color.WHITE);
 
-    // Crear y agregar paneles de corrección
+    // Crear y agregar los paneles de corrección
     for (int i = 0; i < numeroRepeticiones; i++) {
         JPanel panelCopia = createCorreccionPanelCopy();
         correccionContainer.add(panelCopia);
+        if (i < numeroRepeticiones - 1) {
+            correccionContainer.add(Box.createRigidArea(new Dimension(0, 20)));
+        }
     }
 
-    // Agregar el contenedor de paneles al Main (sin scroll)
-    Main.add(correccionContainer, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 80, 770, -1));
+    // Calcular la altura total necesaria
+    int alturaPanel = calcularAlturaPanelCorreccion();
+    int espacioEntrePaneles = 20;
+    alturaTotal = (alturaPanel * numeroRepeticiones) + 
+                 (espacioEntrePaneles * (numeroRepeticiones - 1));
 
-    // Revalidar y repintar el frame
-    revalidate();
-    repaint();
+// Agregar el contenedor de corrección
+    Main.add(correccionContainer, new org.netbeans.lib.awtextra.AbsoluteConstraints(
+        40,    // x
+        80,    // y inicial
+        770,   // ancho
+        alturaTotal  // altura total
+    ));
+
+    // Agregar el panel de calibración inmediatamente después del último panel de corrección
+    Main.add(CALIBRACION, new org.netbeans.lib.awtextra.AbsoluteConstraints(
+        40,           // x 
+        80 + alturaTotal,  // y (justo después del último panel de corrección)
+        770,          // ancho
+        300           // altura
+    ));
+    
+    Main.add(CONTROL, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 220, 770, 180));
+    Main.revalidate();
+    Main.repaint();
+
+    Main.add(CONTROL, new org.netbeans.lib.awtextra.AbsoluteConstraints(
+        40,           // x 
+        80 + alturaTotal + 300,  // y (después del panel CALIBRACION)
+        770,          // ancho
+        180           // altura
+    ));
+
+    // Agregar el botón generar PDF
+    Main.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(
+        870, 
+        80 + alturaTotal + 300 + 10,  // Posicionado después del panel CALIBRACION con un pequeño margen
+        -1, 
+        -1
+    ));
+
+    // Actualizar el tamaño del panel principal para incluir todos los componentes
+Main.setPreferredSize(new Dimension(
+    1056,  // ancho original
+    80 + alturaTotal + 300 + 180 + 50  // altura total incluyendo CONTROL
+));
+
+    // Revalidar y repintar
+    SwingUtilities.invokeLater(() -> {
+        revalidate();
+        repaint();
+    });
+}
+private int calcularAlturaPanelCorreccion() {
+    // Calcular altura del panel de corrección de manera dinámica
+    int alturaHeader = 40;  // Altura del header del panel
+    int alturaFilaTabla = 30;  // Altura de cada fila de tabla
+    int alturaNotaPanel = 70;  // Altura del panel de nota
+    int espaciadoInterno = 10;  // Espacio interno entre elementos
+
+    // Calcular altura total del panel
+    int alturaPanel = alturaHeader + 
+                     (numeroFilasTabla * alturaFilaTabla) + 
+                     alturaNotaPanel +
+                     (2 * espaciadoInterno);  // Espacio arriba y abajo
+
+    return alturaPanel;
 }
     private JPanel createCorreccionPanelCopy() {
         // Panel principal
@@ -328,30 +413,100 @@ private JPanel createCorrectionPanel() {
 
         return jPanel8;
     }
+    private JPanel createCalibracionPanel() {
+    JPanel calibracionPanel = new JPanel();
+    calibracionPanel.setBackground(Color.WHITE);
+    calibracionPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    calibracionPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+    // Encabezado
+    JPanel headerPanel = new JPanel();
+    headerPanel.setBackground(new Color(204, 204, 204));
+    headerPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    JLabel headerLabel = new JLabel("CALIBRACIÓN", SwingConstants.CENTER);
+    headerLabel.setFont(new Font("Helvetica Neue", Font.BOLD, 18));
+    headerPanel.setLayout(new BorderLayout());
+    headerPanel.add(headerLabel, BorderLayout.CENTER);
+    calibracionPanel.add(headerPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 770, 40));
+
+    // Contenido
+    JPanel contentPanel = new JPanel();
+    contentPanel.setLayout(new GridLayout(2, 2, 10, 10)); // Ajustar las filas/columnas
+    contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+    JLabel label1 = new JLabel("Estado del Instrumento:", SwingConstants.RIGHT);
+    JTextField field1 = new JTextField("Valor");
+    JLabel label2 = new JLabel("Fecha de Última Calibración:", SwingConstants.RIGHT);
+    JTextField field2 = new JTextField("yyyy-MM-dd");
+
+    contentPanel.add(label1);
+    contentPanel.add(field1);
+    contentPanel.add(label2);
+    contentPanel.add(field2);
+
+    calibracionPanel.add(contentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 750, 100));
+
+    return calibracionPanel;
+}
+    private JPanel createControlPanel(){
+        JPanel controlPanel = new JPanel();
+        controlPanel.setBackground(Color.WHITE);        
+        controlPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        controlPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        
+        // Encabezado
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(204, 204, 204));
+        headerPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        JLabel headerLabel = new JLabel("CALIBRACIÓN", SwingConstants.CENTER);
+        headerLabel.setFont(new Font("Helvetica Neue", Font.BOLD, 18));
+        headerPanel.setLayout(new BorderLayout());
+        headerPanel.add(headerLabel, BorderLayout.CENTER);
+        controlPanel.add(headerPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 770, 40));
+        // Contenido
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new GridLayout(2, 2, 10, 10)); // Ajustar las filas/columnas
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel label1 = new JLabel("Estado del Instrumento:", SwingConstants.RIGHT);
+        JTextField field1 = new JTextField("Valor");
+        JLabel label2 = new JLabel("Fecha de Última Calibración:", SwingConstants.RIGHT);
+        JTextField field2 = new JTextField("yyyy-MM-dd");
+
+        contentPanel.add(label1);
+        contentPanel.add(field1);
+        contentPanel.add(label2);
+        contentPanel.add(field2);
+
+        controlPanel.add(contentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 750, 100));
+
+
+        return controlPanel;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
      * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jTextField3 = new javax.swing.JTextField();
         jPanel13 = new javax.swing.JPanel();
         Main = new javax.swing.JPanel();
         header = new javax.swing.JPanel();
-        jTextField2 = new javax.swing.JTextField();
+        Serial = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        Instrumento = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
+        Certificados = new javax.swing.JTextField();
         Correccion = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
@@ -367,6 +522,27 @@ private JPanel createCorrectionPanel() {
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        CALIBRACION = new javax.swing.JPanel();
+        jPanel9 = new javax.swing.JPanel();
+        jLabel14 = new javax.swing.JLabel();
+        jPanel10 = new javax.swing.JPanel();
+        jPanel11 = new javax.swing.JPanel();
+        jLabel15 = new javax.swing.JLabel();
+        jTextField7 = new javax.swing.JTextField();
+        jPanel12 = new javax.swing.JPanel();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel17 = new javax.swing.JLabel();
+        jTextField8 = new javax.swing.JTextField();
+        jPanel14 = new javax.swing.JPanel();
+        jPanel17 = new javax.swing.JPanel();
+        jLabel18 = new javax.swing.JLabel();
+        jLabel20 = new javax.swing.JLabel();
+        jPanel15 = new javax.swing.JPanel();
+        jLabel19 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        jTextField9 = new javax.swing.JTextField();
+        jTextField10 = new javax.swing.JTextField();
 
         jTextField3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         jTextField3.addActionListener(new java.awt.event.ActionListener() {
@@ -393,15 +569,15 @@ private JPanel createCorrectionPanel() {
 
         header.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jTextField2.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
-        jTextField2.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        jTextField2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        Serial.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        Serial.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        Serial.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        Serial.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
+                SerialActionPerformed(evt);
             }
         });
-        header.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 0, 100, 60));
+        header.add(Serial, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 0, 100, 60));
 
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
@@ -456,15 +632,15 @@ private JPanel createCorrectionPanel() {
 
         header.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 0, -1, -1));
 
-        jTextField1.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
-        jTextField1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        jTextField1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        Instrumento.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        Instrumento.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        Instrumento.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        Instrumento.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                InstrumentoActionPerformed(evt);
             }
         });
-        header.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 0, 160, 60));
+        header.add(Instrumento, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 0, 160, 60));
 
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
@@ -488,10 +664,10 @@ private JPanel createCorrectionPanel() {
 
         header.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
-        jTextField4.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
-        jTextField4.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        jTextField4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        header.add(jTextField4, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 0, 100, 60));
+        Certificados.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        Certificados.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        Certificados.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        header.add(Certificados, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 0, 100, 60));
 
         Main.add(header, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 20, 770, 60));
 
@@ -585,14 +761,180 @@ private JPanel createCorrectionPanel() {
         jPanel4.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 0, 190, 70));
 
         Correccion.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, -1, 100));
+        CALIBRACION.setBackground(new java.awt.Color(255, 255, 255));
+        CALIBRACION.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        CALIBRACION.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        // Configuración del panel CALIBRACION
+        jPanel9.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel14.setFont(new java.awt.Font("Helvetica Neue", 1, 18));
+        jLabel14.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel14.setText("CALIBRACIÓN");
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+                jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, 768, Short.MAX_VALUE)
+        );
+        jPanel9Layout.setVerticalGroup(
+                jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jLabel14)
+                                .addContainerGap(9, Short.MAX_VALUE))
+        );
+
+        CALIBRACION.add(jPanel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 770, 40));
+
+// Panel izquierdo (Estado del instrumento y fecha última calibración)
+        jPanel10.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel10.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel11.setBackground(new java.awt.Color(0, 204, 51));
+        jPanel11.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel11.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel15.setFont(new java.awt.Font("Helvetica Neue", 1, 13));
+        jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel15.setText("ESTADO DEL INSTRUMENTO");
+        jPanel11.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 200, 20));
+
+        jPanel10.add(jPanel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 40));
+
+        jTextField7.setFont(new java.awt.Font("Helvetica Neue", 1, 13));
+        jTextField7.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel10.add(jTextField7, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 190, 40));
+
+        jPanel12.setBackground(new java.awt.Color(51, 204, 255));
+        jPanel12.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel16.setFont(new java.awt.Font("Helvetica Neue", 1, 14));
+        jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel16.setText("FECHA DE ÚLTIMA");
+
+        jLabel17.setFont(new java.awt.Font("Helvetica Neue", 1, 14));
+        jLabel17.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel17.setText("CALIBRACIÓN");
+
+        javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
+        jPanel12.setLayout(jPanel12Layout);
+        jPanel12Layout.setHorizontalGroup(
+                jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+        );
+        jPanel12Layout.setVerticalGroup(
+                jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel12Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel17)
+                                .addContainerGap(42, Short.MAX_VALUE))
+        );
+
+        jPanel10.add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 200, 100));
+
+        jTextField8.setFont(new java.awt.Font("Helvetica Neue", 1, 13));
+        jTextField8.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField8.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel10.add(jTextField8, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 40, 190, 100));
+
+        CALIBRACION.add(jPanel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 390, 140));
+
+// Panel derecho (Frecuencia de calibración y fecha próxima calibración)
+        jPanel14.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel14.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel14.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel17.setBackground(new java.awt.Color(0, 204, 51));
+        jPanel17.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel17.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel18.setFont(new java.awt.Font("Helvetica Neue", 1, 14));
+        jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel18.setText("FRECUENCIA DE");
+        jPanel17.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(1, 1, 178, -1));
+
+        jLabel20.setFont(new java.awt.Font("Helvetica Neue", 1, 14));
+        jLabel20.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel20.setText("CALIBRACIÓN");
+        jPanel17.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 20, 180, -1));
+
+        jPanel14.add(jPanel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 180, 40));
+
+        jPanel15.setBackground(new java.awt.Color(51, 204, 255));
+        jPanel15.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel19.setFont(new java.awt.Font("Helvetica Neue", 1, 14));
+        jLabel19.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel19.setText("FECHA DE PRÓXIMA");
+
+        jLabel21.setFont(new java.awt.Font("Helvetica Neue", 1, 14));
+        jLabel21.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel21.setText("CALIBRACIÓN");
+
+        javax.swing.GroupLayout jPanel15Layout = new javax.swing.GroupLayout(jPanel15);
+        jPanel15.setLayout(jPanel15Layout);
+        jPanel15Layout.setHorizontalGroup(
+                jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
+                        .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel15Layout.setVerticalGroup(
+                jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel15Layout.createSequentialGroup()
+                                .addGap(19, 19, 19)
+                                .addComponent(jLabel19)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel21)
+                                .addContainerGap(37, Short.MAX_VALUE))
+        );
+
+        jPanel14.add(jPanel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 180, 100));
+
+        jTextField9.setFont(new java.awt.Font("Helvetica Neue", 1, 13));
+        jTextField9.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField9.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel14.add(jTextField9, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 0, 200, 40));
+
+        jTextField10.setFont(new java.awt.Font("Helvetica Neue", 1, 13));
+        jTextField10.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel14.add(jTextField10, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 40, 200, 100));
+
+        CALIBRACION.add(jPanel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 40, 380, 140));
 
         Main.add(Correccion, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 80, 770, 140));
+
+        Main.add(CALIBRACION, new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                40, // x
+                80 + alturaTotal, // y (debajo del último panel)
+                770, // ancho
+                300  // altura
+        ));
+
+        
+
+        jButton1.setText("GENERAR PDF");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        Main.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(870, 180, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(Main, javax.swing.GroupLayout.DEFAULT_SIZE, 887, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(Main, javax.swing.GroupLayout.PREFERRED_SIZE, 1056, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -602,19 +944,23 @@ private JPanel createCorrectionPanel() {
         );
 
         pack();
-    }// </editor-fold>                        
+    }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {                                            
+    private void SerialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SerialActionPerformed
         // TODO add your handling code here:
-    }                                           
+    }//GEN-LAST:event_SerialActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {                                            
+    private void InstrumentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_InstrumentoActionPerformed
         // TODO add your handling code here:
-    }                                           
+    }//GEN-LAST:event_InstrumentoActionPerformed
 
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {                                            
+    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
         // TODO add your handling code here:
-    }                                           
+    }//GEN-LAST:event_jTextField3ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -651,10 +997,14 @@ private JPanel createCorrectionPanel() {
         });
     }
 
-    // Variables declaration - do not modify                     
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField Certificados;
     private javax.swing.JPanel Correccion;
+    private javax.swing.JTextField Instrumento;
     private javax.swing.JPanel Main;
+    private javax.swing.JTextField Serial;
     private javax.swing.JPanel header;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -677,9 +1027,27 @@ private JPanel createCorrectionPanel() {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    // End of variables declaration                   
+    private javax.swing.JPanel CALIBRACION;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel12;
+    private javax.swing.JPanel jPanel14;
+    private javax.swing.JPanel jPanel15;
+    private javax.swing.JPanel jPanel17;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JTextField jTextField10;
+    private javax.swing.JTextField jTextField7;
+    private javax.swing.JTextField jTextField8;
+    private javax.swing.JTextField jTextField9;
+    private JPanel CONTROL;
+    // End of variables declaration//GEN-END:variables
 }
