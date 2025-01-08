@@ -1,13 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
+
 package com.login;
+// Importaciones básicas de iText 7
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
+
+
+
 /**
  *
  * @author sena
@@ -183,16 +188,16 @@ private void createCorreccionPanels() {
         40,           // x 
         80 + alturaTotal,  // y (justo después del último panel de corrección)
         770,          // ancho
-        300           // altura
+        180           // altura
     ));
-    
-    Main.add(CONTROL, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 220, 770, 180));
+
+    Main.add(CONTROL, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 40, 770, 180));
     Main.revalidate();
     Main.repaint();
 
     Main.add(CONTROL, new org.netbeans.lib.awtextra.AbsoluteConstraints(
         40,           // x 
-        80 + alturaTotal + 300,  // y (después del panel CALIBRACION)
+        80 + alturaTotal + 180,  // y (después del panel CALIBRACION)
         770,          // ancho
         180           // altura
     ));
@@ -448,41 +453,250 @@ private JPanel createCorrectionPanel() {
 
     return calibracionPanel;
 }
-    private JPanel createControlPanel(){
-        JPanel controlPanel = new JPanel();
-        controlPanel.setBackground(Color.WHITE);        
-        controlPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        controlPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        
-        // Encabezado
-        JPanel headerPanel = new JPanel();
-        headerPanel.setBackground(new Color(204, 204, 204));
-        headerPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        JLabel headerLabel = new JLabel("CALIBRACIÓN", SwingConstants.CENTER);
-        headerLabel.setFont(new Font("Helvetica Neue", Font.BOLD, 18));
-        headerPanel.setLayout(new BorderLayout());
-        headerPanel.add(headerLabel, BorderLayout.CENTER);
-        controlPanel.add(headerPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 770, 40));
-        // Contenido
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new GridLayout(2, 2, 10, 10)); // Ajustar las filas/columnas
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+private JPanel createControlPanel() {
+    JPanel CONTROL = new JPanel();
+    CONTROL.setBackground(new Color(255, 255, 255));
+    CONTROL.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+    CONTROL.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        JLabel label1 = new JLabel("Estado del Instrumento:", SwingConstants.RIGHT);
-        JTextField field1 = new JTextField("Valor");
-        JLabel label2 = new JLabel("Fecha de Última Calibración:", SwingConstants.RIGHT);
-        JTextField field2 = new JTextField("yyyy-MM-dd");
+    // Panel superior con título "CONTROL"
+    JPanel jPanel9 = new JPanel();
+    jPanel9.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+    
+    JLabel jLabel14 = new JLabel();
+    jLabel14.setFont(new Font("Helvetica Neue", Font.BOLD, 18));
+    jLabel14.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel14.setText("CONTROL");
 
-        contentPanel.add(label1);
-        contentPanel.add(field1);
-        contentPanel.add(label2);
-        contentPanel.add(field2);
+    GroupLayout jPanel9Layout = new GroupLayout(jPanel9);
+    jPanel9.setLayout(jPanel9Layout);
+    jPanel9Layout.setHorizontalGroup(
+        jPanel9Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        .addComponent(jLabel14, GroupLayout.DEFAULT_SIZE, 768, Short.MAX_VALUE)
+    );
+    jPanel9Layout.setVerticalGroup(
+        jPanel9Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        .addGroup(jPanel9Layout.createSequentialGroup()
+            .addContainerGap()
+            .addComponent(jLabel14)
+            .addContainerGap(9, Short.MAX_VALUE))
+    );
 
-        controlPanel.add(contentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 750, 100));
+    CONTROL.add(jPanel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 770, 40));
 
+    // Panel izquierdo (ACTUALIZADO POR)
+    JPanel leftPanel = createLeftPanel();
+    CONTROL.add(leftPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 390, 140));
 
-        return controlPanel;
-    }
+    // Panel derecho (REVISADO Y APROBADO POR)
+    JPanel rightPanel = createRightPanel();
+    CONTROL.add(rightPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 40, 380, 140));
+
+    return CONTROL;
+}
+
+private JPanel createLeftPanel() {
+    JPanel jPanel10 = new JPanel();
+    jPanel10.setBackground(new Color(255, 255, 255));
+    jPanel10.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+    jPanel10.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+    // Sección "ACTUALIZADO POR"
+    JPanel jPanel11 = new JPanel();
+    jPanel11.setBackground(new Color(255, 255, 255));
+    jPanel11.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+    jPanel11.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+    JLabel jLabel15 = new JLabel();
+    jLabel15.setFont(new Font("Helvetica Neue", Font.BOLD, 13));
+    jLabel15.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel15.setText("ACTUALIZADO POR");
+    jPanel11.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 200, 20));
+
+    jPanel10.add(jPanel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 40));
+
+    // Panel para el Analista
+    JPanel jPanel12 = new JPanel();
+    jPanel12.setBackground(new Color(255, 255, 255));
+    jPanel12.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+
+    JLabel jLabel16 = new JLabel();
+    jLabel16.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    jLabel16.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel16.setText("_______________________");
+
+    JLabel jLabel17 = new JLabel();
+    jLabel17.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    jLabel17.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel17.setText("Analista");
+
+    GroupLayout jPanel12Layout = new GroupLayout(jPanel12);
+    jPanel12.setLayout(jPanel12Layout);
+    jPanel12Layout.setHorizontalGroup(
+        jPanel12Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        .addComponent(jLabel17, GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+        .addGroup(jPanel12Layout.createSequentialGroup()
+            .addContainerGap()
+            .addComponent(jLabel16, GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
+            .addContainerGap())
+    );
+    jPanel12Layout.setVerticalGroup(
+        jPanel12Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        .addGroup(jPanel12Layout.createSequentialGroup()
+            .addContainerGap(48, Short.MAX_VALUE)
+            .addComponent(jLabel16, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(jLabel17))
+    );
+
+    jPanel10.add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 200, 100));
+
+    // Sección de fecha
+    JPanel dateHeaderPanel = new JPanel();
+    dateHeaderPanel.setBackground(new Color(255, 255, 255));
+    dateHeaderPanel.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+    dateHeaderPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+    JLabel dateLabel = new JLabel();
+    dateLabel.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    dateLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    dateLabel.setText("FECHA");
+    dateHeaderPanel.add(dateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(2, 10, 190, -1));
+
+    jPanel10.add(dateHeaderPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 190, 40));
+
+    // Campo de fecha
+    JPanel datePanel = createDatePanel();
+    jPanel10.add(datePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 40, 190, 100));
+
+    return jPanel10;
+}
+
+private JPanel createRightPanel() {
+    JPanel jPanel14 = new JPanel();
+    jPanel14.setBackground(new Color(255, 255, 255));
+    jPanel14.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+    jPanel14.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+    // Panel superior con "REVISADO Y APROBADO POR"
+    JPanel jPanel17 = new JPanel();
+    jPanel17.setBackground(new Color(255, 255, 255));
+    jPanel17.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+    jPanel17.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+    JLabel jLabel18 = new JLabel();
+    jLabel18.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    jLabel18.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel18.setText("REVISADO Y");
+    jPanel17.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(1, 1, 178, -1));
+
+    JLabel jLabel19 = new JLabel();
+    jLabel19.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    jLabel19.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel19.setText("APROBADO POR");
+    jPanel17.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 20, 178, -1));
+
+    jPanel14.add(jPanel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 180, 40));
+
+    // Panel para Coordinador Técnico
+    JPanel jPanel15 = new JPanel();
+    jPanel15.setBackground(new Color(255, 255, 255));
+    jPanel15.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+
+    JLabel jLabel21 = new JLabel();
+    jLabel21.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    jLabel21.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel21.setText("Coordinador Técnico");
+
+    JLabel jLabel22 = new JLabel();
+    jLabel22.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    jLabel22.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel22.setText("_______________________");
+
+    GroupLayout jPanel15Layout = new GroupLayout(jPanel15);
+    jPanel15.setLayout(jPanel15Layout);
+    jPanel15Layout.setHorizontalGroup(
+        jPanel15Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        .addComponent(jLabel21, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addGroup(jPanel15Layout.createSequentialGroup()
+            .addContainerGap()
+            .addComponent(jLabel22)
+            .addContainerGap(11, Short.MAX_VALUE))
+    );
+    jPanel15Layout.setVerticalGroup(
+        jPanel15Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+        .addGroup(jPanel15Layout.createSequentialGroup()
+            .addGap(0, 44, Short.MAX_VALUE)
+            .addComponent(jLabel22, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(jLabel21))
+    );
+
+    jPanel14.add(jPanel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 180, 100));
+
+    // Panel de fecha derecho - Header
+    JPanel rightDateHeader = new JPanel();
+    rightDateHeader.setBackground(new Color(255, 255, 255));
+    rightDateHeader.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+    rightDateHeader.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+    JLabel dateLabel2 = new JLabel();
+    dateLabel2.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    dateLabel2.setHorizontalAlignment(SwingConstants.CENTER);
+    dateLabel2.setText("FECHA");
+    rightDateHeader.add(dateLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(2, 10, 190, -1));
+
+    jPanel14.add(rightDateHeader, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 0, 200, 40));
+
+    // Panel de fecha derecho - Campo
+    JPanel rightDatePanel = createDatePanel();
+    jPanel14.add(rightDatePanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 40, 200, 100));
+
+    return jPanel14;
+}
+
+private JPanel createDatePanel() {
+    JPanel datePanel = new JPanel();
+    datePanel.setBackground(new Color(255, 255, 255));
+    datePanel.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0)));
+
+    JLabel dateUnderline = new JLabel();
+    dateUnderline.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    dateUnderline.setHorizontalAlignment(SwingConstants.CENTER);
+    dateUnderline.setText("_______________________");
+
+    JTextField dateField = new JTextField();
+    dateField.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+    dateField.setHorizontalAlignment(JTextField.CENTER);
+    dateField.setText("Yy/Mm/Dd");
+    dateField.setBorder(null);
+
+    GroupLayout datePanelLayout = new GroupLayout(datePanel);
+    datePanel.setLayout(datePanelLayout);
+    datePanelLayout.setHorizontalGroup(
+        datePanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        .addGroup(datePanelLayout.createSequentialGroup()
+            .addGroup(datePanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(datePanelLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(dateField, GroupLayout.PREFERRED_SIZE, 180, GroupLayout.PREFERRED_SIZE))
+                .addGroup(datePanelLayout.createSequentialGroup()
+                    .addGap(14, 14, 14)
+                    .addComponent(dateUnderline)))
+            .addGap(12, 12, 12))
+    );
+    datePanelLayout.setVerticalGroup(
+        datePanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        .addGroup(datePanelLayout.createSequentialGroup()
+            .addGap(39, 39, 39)
+            .addComponent(dateUnderline, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(dateField, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE)
+            .addContainerGap())
+    );
+
+    return datePanel;
+}
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -938,9 +1152,7 @@ private JPanel createCorrectionPanel() {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(Main, javax.swing.GroupLayout.PREFERRED_SIZE, 937, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(Main)
         );
 
         pack();
